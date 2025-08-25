@@ -6,4 +6,6 @@ load_dotenv(dotenv_path)
 
 API_KEY = os.getenv("API_KEY", "")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 PS3_BACKEND_CORS_ORIGIN = os.getenv("PS3_BACKEND_CORS_ORIGIN", "*")

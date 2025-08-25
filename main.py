@@ -1,6 +1,5 @@
+from ps3_worker.consumers.data_consumer_in import data_consumer
+
+
 def main():
-    print("Hello from ps3-worker!")
-
-
-if __name__ == "__main__":
-    main()
+    data_consumer()

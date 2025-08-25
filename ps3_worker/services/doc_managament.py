@@ -103,20 +103,50 @@ class DocManagament:
         pdf_document.close()
         print(f"PDF convertido a escala de grises y guardado en: {output_pdf_path}")
 
-    def to_jpgs(self, output_dir=None):
+    def to_jpgs(self, output_dir=None, dpi=150, max_width=1600, max_height=None, quality=75, grayscale=False):
         try:
             if output_dir is None:
                 output_dir = self.data_dir
             os.makedirs(output_dir, exist_ok=True)
-            print(f"Convirtiendo '{self.pdf_path}' a JPGs en '{output_dir}'...")
+            print(f"Convirtiendo '{self.pdf_path}' a JPGs en '{output_dir}' (dpi={dpi}, quality={quality})...")
 
-            # pyrefly: ignore  # bad-argument-type
             images = convert_from_path(
-                self.pdf_path, poppler_path=r"C:\Program Files\Poppler\Library\bin"
+                self.pdf_path,
+                poppler_path=r"C:\\Program Files\\Poppler\\Library\\bin",
+                dpi=dpi,
             )
             for i, image in enumerate(images):
                 jpg_path = os.path.join(output_dir, f"page_{i+1}.jpg")
-                image.save(jpg_path, "JPEG")
+                if grayscale:
+                    image = image.convert("L")
+                else:
+                    image = image.convert("RGB")
+
+                orig_w, orig_h = image.size
+                scale_w = max_width / orig_w if max_width else 1.0
+                scale_h = (max_height / orig_h) if max_height else 1.0
+                scale = min(scale_w, scale_h) if (max_width or max_height) else 1.0
+                if scale < 1.0:
+                    new_w = max(1, int(orig_w * scale))
+                    new_h = max(1, int(orig_h * scale))
+                    try:
+                        resampling = Image.Resampling.LANCZOS
+                    except AttributeError:
+                        resampling = Image.LANCZOS
+                    image = image.resize((new_w, new_h), resampling)
+
+                save_kwargs = {
+                    "format": "JPEG",
+                    "quality": int(quality),
+                    "optimize": True,
+                    "progressive": True,
+                }
+                try:
+                    save_kwargs["subsampling"] = 2  # 4:2:0
+                except Exception:
+                    pass
+
+                image.save(jpg_path, **save_kwargs)
 
             self.n_pages = len(images)  # type: ignore
 

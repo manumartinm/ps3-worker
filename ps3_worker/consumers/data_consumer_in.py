@@ -1,4 +1,5 @@
 import os
+import re
 import hashlib
 import json
 from typing import Any, Dict
@@ -89,10 +90,7 @@ def amqp_callback(ch, method, properties, body: bytes) -> None:
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
-def main() -> None:
-    # Parse AMQP_URL
-    import re
-
+def data_consumer() -> None:
     match = re.match(r"amqp://(.*?):(.*?)@(.*?):(\d+)(/.*)?", AMQP_URL)
     if not match:
         raise ValueError("AMQP_URL mal formado")
@@ -104,7 +102,3 @@ def main() -> None:
         f"[INFO] Esperando mensajes en la cola '{QUEUE_NAME}'. Para salir presiona CTRL+C."
     )
     amqp.consume(QUEUE_NAME, amqp_callback)
-
-
-if __name__ == "__main__":
-    main()
